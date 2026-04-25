@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>予約状況一覧 | 管理画面</title>
+    <style>
+        body { font-family: "Helvetica Neue", Arial, sans-serif; background-color: #f8f9fa; padding: 20px; color: #333; }
+        h1 { text-align: center; color: #444; }
+        .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+        th { background-color: #007bff; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .loading { text-align: center; font-size: 1.2em; padding: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>予約状況一覧</h1>
+    <div id="loading" class="loading">データを取得中...</div>
+    <table id="reservationTable" style="display:none;">
+        <thead>
+            <tr>
+                <th>予約日時</th>
+                <th>保護者</th>
+                <th>お子様</th>
+                <th>学年</th>
+                <th>電話番号</th>
+                <th>住所</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+</div>
+
+<script>
+    // ★重要：ここをあなたのRenderのURL（https://～.onrender.com）に書き換えてください
+    const API_URL = 'https://あなたのアプリ名.onrender.com/api/admin/reservations';
+
+    async function fetchReservations() {
+        try {
+            const response = await fetch(API_URL);
+            if (!response.ok) throw new Error('データの取得に失敗しました');
+            
+            const data = await response.json();
+            const tableBody = document.getElementById('tableBody');
+            
+            data.forEach(res => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${new Date(res.createdAt).toLocaleString('ja-JP')}</td>
+                    <td>${res.parentName}</td>
+                    <td>${res.childName}</td>
+                    <td>${res.grade}</td>
+                    <td>${res.phoneNumber}</td>
+                    <td>${res.address}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('reservationTable').style.display = 'table';
+        } catch (error) {
+            document.getElementById('loading').innerText = 'エラー: ' + error.message;
+            console.error(error);
+        }
+    }
+
+    fetchReservations();
+</script>
+
+</body>
+</html>
